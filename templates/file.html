@@ -111,17 +111,12 @@
         })
     </script>
 
-<!-- The core Firebase JS SDK is always required and must be listed first -->
 <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
 
-<!-- TODO: Add SDKs for Firebase products that you want to use
-    https://firebase.google.com/docs/web/setup#available-libraries -->
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
     
-    <!-- Our script must be loaded after firebase references -->
     <script>
-        // Your web app's Firebase configuration
 var firebaseConfig = {
     apiKey: "AIzaSyCoQ5vYTXkzqabEBCWLJm0uCpPZZjdm00Y",
     authDomain: "keshamransh.firebaseapp.com",
@@ -130,41 +125,28 @@ var firebaseConfig = {
     messagingSenderId: "1083789759825",
     appId: "1:1083789759825:web:74fe94a25955dcda4d2f70"
   };
-  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
-  // Initialize variables
   const auth = firebase.auth()
   const database = firebase.database()
   
-  // Set up our register function
   function register () {
-    // Get all our input fields
     email = document.getElementById('email').value
     password = document.getElementById('password').value
     full_name = document.getElementById('full_name').value
-    // favourite_song = document.getElementById('favourite_song').value
-    // milk_before_cereal = document.getElementById('milk_before_cereal').value
-  
-    // Validate input fields
     if (validate_email(email) == false || validate_password(password) == false) {
       alert('Email or Password is invalid!!')
       return
-      // Don't continue running the code
     }
     if (validate_field(full_name) == false) {
       alert('One or More Extra Fields is invalid!!')
       return
     }
-    // Move on with Auth
     auth.createUserWithEmailAndPassword(email, password)
     .then(function() {
-        // Declare user variable
       var user = auth.currentUser
   
-      // Add this user to Firebase Database
       var database_ref = database.ref()
       user_con.classList.remove('login-section--display')  
-      // Create User data
       var user_data = {
         email : email,
         full_name : full_name,
@@ -173,13 +155,10 @@ var firebaseConfig = {
         last_login : Date.now()
       }
 
-      // Push to Firebase Database
       database_ref.child('users/' + user.uid).set(user_data)
-      // DOne
       alert('User Created!!')
     })
     .catch(function(error) {
-      // Firebase will use this to alert of its errors
       var error_code = error.code
       var error_message = error.message
   
@@ -189,14 +168,11 @@ var firebaseConfig = {
   
   // Set up our login function
   function login () {
-    // Get all our input fields
     email = document.getElementById('email2').value
     password = document.getElementById('password2').value
-    // Validate input fields
     if (validate_email(email) == false || validate_password(password) == false) {
         alert('Email or Password is invalid!!')
         return
-        // Don't continue running the code
     }
     
     auth.signInWithEmailAndPassword(email, password)

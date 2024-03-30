@@ -18,15 +18,12 @@ global output
 
 
 def open_spot():
-    # Replace with your own Client ID and Client Secret
     CLIENT_ID = "29552cf19dd74bdc9ca2bf1af6a555e4"
     CLIENT_SECRET = "7e8cac1fa75f480cad828a7c391044a5"
 
-    # Base64 encode the client ID and client secret
     client_credentials = f"{CLIENT_ID}:{CLIENT_SECRET}"
     client_credentials_base64 = base64.b64encode(client_credentials.encode())
 
-    # Request the access token
     token_url = 'https://accounts.spotify.com/api/token'
     headers = {
         'Authorization': f'Basic {client_credentials_base64.decode()}'
@@ -53,10 +50,8 @@ all_tracks = all_tracks.sort_values(by='popularity', ascending=False)
 scaler = MinMaxScaler()
 
 def get_trending_playlist_data(playlist_id, access_token):
-    # Set up Spotipy with the access token
     sp = spotipy.Spotify(auth=access_token)
 
-    # Extract relevant information and store in a list of dictionaries
     music_data = []
     i = 0
     while len(sp.playlist_tracks(playlist_id, fields='items(track(id, name, artists, album(id, name)))', offset = i * 100)['items']):
@@ -76,24 +71,20 @@ def get_trending_playlist_data(playlist_id, access_token):
                 music_data.append(all_tracks.loc[all_tracks['name'] == track_name].iloc[0].squeeze().to_dict())
                 continue
 
-            # Get audio features for the track
             audio_features = sp.audio_features(track_id)[0] if track_id != 'Not available' else None
 
-            # Get release date of the album
             try:
                 album_info = sp.album(album_id) if album_id != 'Not available' else None
                 release_date = album_info['release_date'] if album_info else None
             except:
                 release_date = None
 
-            # Get popularity of the track
             try:
                 track_info = sp.track(track_id) if track_id != 'Not available' else None
                 popularity = track_info['popularity'] if track_info else None
             except:
                 popularity = None
 
-            # Add additional track information to the track data
             track_data = {
                 'name': track_name,
                 'artists': artists,
@@ -112,14 +103,12 @@ def get_trending_playlist_data(playlist_id, access_token):
                 'liveness': audio_features['liveness'] if audio_features else None,
                 'valence': audio_features['valence'] if audio_features else None,
                 'tempo': audio_features['tempo'] if audio_features else None,
-                # Add more attributes as needed
             }
 
             music_data.append(track_data)
 
         i += 1
 
-    # Create a pandas DataFrame from the list of dictionaries
     df = pd.DataFrame(music_data)
 
     return df
@@ -160,18 +149,14 @@ def content_based_recommendations(music_df, num_recommendations=5):
             'instrumentalness', 'liveness', 'valence', 'tempo']].values
     all_tracks_features_scaled = scaler.fit_transform(all_tracks_features)
 
-    # Calculate the similarity scores based on music features (cosine similarity)
     similarity_scores = cosine_similarity(music_features_scaled, all_tracks_features_scaled)
 
-    # Get the indices of the most similar songs
     similar_song_indices = similarity_scores.argsort()[0][::-1][1:num_recommendations * 15 + 1]
 
     artists = [item for sublist in music_df["artists"] for item in sublist]
 
-    # Get the names of the most similar songs based on content-based filtering
     content_based_rec = all_tracks.iloc[similar_song_indices][['name', 'artists', 'popularity', 'id']]
     content_based_rec = content_based_rec.drop_duplicates(subset = "name")
-    #content_based_rec["id"] = "https://open.spotify.com/track/" + content_based_rec["id"].str[:]
     for artist in set(content_based_rec["artists"]).intersection(set(artists)):
         content_based_rec.loc[content_based_rec["artists"] == artist, 'popularity'] += 10
     content_based_rec = content_based_rec.sort_values(by="popularity", ascending = False)
@@ -189,7 +174,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def login():
-    return render_template('keshav.html')
+    return render_template('file.html')
 
 @app.route('/home')
 def home():
@@ -218,7 +203,6 @@ def predict():
             mode = "gauge+number",
             value = output,
             domain = {'x': [0, 1], 'y': [0, 1]},
-            #delta = {'reference': 60, 'increasing': {'color': "green"}},
             gauge = {
                 'axis': {'range': [None, 100], 'tickwidth': 1, 'tickcolor': "black"},
                 'bar': {'color': "darkgreen"},
